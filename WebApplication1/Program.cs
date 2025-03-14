@@ -3,6 +3,13 @@ using Scalar.AspNetCore;
 using WebApplication1.Models;
 
 
+static bool IsOriginAllowed(string origin)
+{
+    Uri uri = new(origin);
+    bool isAllowed = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+    return isAllowed;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,6 +19,21 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Enable Cors
+_ = builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowedCorsOrigins",
+        builder =>
+        {
+            
+            _ = builder
+            .SetIsOriginAllowed(IsOriginAllowed)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -24,6 +46,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowedCorsOrigins");
 
 app.UseAuthorization();
 
