@@ -45,10 +45,16 @@ namespace WebApplication1.Controllers
         {
             List<Township> townships = await _context.Townships.ToListAsync();
             int totalTownships = townships.Count;
-            return Ok(new
+            return Ok(new DefaultResponseModel()
             {
-                TotalTownships = totalTownships,
-                Townships = townships
+                Success = false,
+                Statuscode = StatusCodes.Status200OK,
+                Message = "Successfully fetched",
+                Data = new
+                {
+                    TotalTownships = totalTownships,
+                    Townships = townships
+                }
             });
         }
 
@@ -126,9 +132,6 @@ namespace WebApplication1.Controllers
             List<Township> townships = _context.Townships.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             return Ok(townships);
         }
-
-
-
 
     }
 }
